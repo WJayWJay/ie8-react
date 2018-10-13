@@ -6,13 +6,13 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 module.exports = {
     devtool: 'cheap-module-source-map',
     entry: {
-        production: path.resolve(__dirname, './views/production/app.jsx'),
+        production: path.resolve(__dirname, './src/main.js'),
     },
     output: {
         path: path.resolve(__dirname, 'devtmp'),
-        filename: 'js/[name].js',
+        filename: 'js/[name].[hash].js',
         publicPath: '/',
-        chunkFilename: 'js/[name].js',
+        chunkFilename: 'js/[name].[hash].js',
     },
     resolve: {
         extensions: ['.js', '.json', '.jsx'],
@@ -22,6 +22,9 @@ module.exports = {
             'prop-types': 'anujs/lib/ReactPropTypes',
             devtools: 'anujs/lib/devtools',
             'create-react-class': 'anujs/lib/createClass',
+            router: "anujs/dist/Router.js",
+            rematch: "anujs/dist/Rematch.js",
+            "@": path.resolve(__dirname, 'src/'),
         },
     },
     module: {
@@ -49,12 +52,12 @@ module.exports = {
                         plugins: ['transform-runtime'],
                     },
                 },
-                include: [path.resolve(__dirname, 'views')],
+                include: [path.resolve(__dirname, 'src')],
             },
             {
-                test: /\.css$/,
+                test: /\.((css)|(less))$/,
                 include: [path.resolve(__dirname, 'views')],
-                use: ['style-loader', 'css-loade'],
+                use: ['style-loader', 'css-loader', 'less-loader'],
             },
             {
                 test: /\.(eot|woff|woff2|ttf|svg|png|jpg|gif)$/,
@@ -74,7 +77,7 @@ module.exports = {
     plugins: [
         new es3ifyPlugin(),
         new HtmlWebpackPlugin({
-            filename: 'production.html',
+            filename: 'index.html',
             template: path.resolve(__dirname, './views/production/index.ejs'),
             inject: 'body',
             hase: false,
