@@ -55,15 +55,24 @@ const config = {
                             'react',
                             'stage-2',
                         ],
-                        plugins: ['transform-runtime'],
+                        plugins: [
+                            'transform-runtime', 
+                            ["import", {"libraryName": "antd",  "style": 'css', "libraryDirectory": "lib"}]
+                        ],
                     },
                 },
                 include: [path.resolve(__dirname, '../src')],
             },
             {
                 test: /\.((css)|(less))$/,
-                include: [path.resolve(__dirname, '../src')],
-                use: ['style-loader', { loader: 'css-loader', options: { importLoaders: 1 } }, 'postcss-loader', 'less-loader'],
+                include: [path.resolve(__dirname, '../src'), /node_modules\/antd/],
+                use: [
+                    'style-loader', 
+                    { loader: 'css-loader', options: { importLoaders: 1 } }, 
+                    // 'css-loader',
+                    'postcss-loader', 
+                    'less-loader'
+                ],
             },
             {
                 test: /\.(eot|woff|woff2|ttf|svg|png|jpg|gif)$/,
