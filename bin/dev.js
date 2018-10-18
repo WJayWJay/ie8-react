@@ -16,9 +16,7 @@ const devServerOptions = Object.assign({}, {
     inline: true,
     hot: true,
     noInfo: false,
-    host: config.host,
-    port: config.port
-  });
+  }, config);
   WebpackDevServer.addDevServerEntrypoints(webpackConfig, devServerOptions);
 
   const compiler = webpack(webpackConfig);
