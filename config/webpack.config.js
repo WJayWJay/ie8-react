@@ -64,14 +64,30 @@ const config = {
                 include: [path.resolve(__dirname, '../src')],
             },
             {
-                test: /\.((css)|(less))$/,
+                test: /\.css$/,
                 include: [path.resolve(__dirname, '../src'), /node_modules\/antd/],
                 use: [
                     'style-loader', 
-                    { loader: 'css-loader', options: { importLoaders: 1 } }, 
+                    { loader: 'css-loader', options: { importLoaders: 2 } }, 
                     // 'css-loader',
                     'postcss-loader', 
-                    'less-loader'
+                    // 'less-loader',
+                ],
+            },
+            {
+                test: /\.less$/,
+                include: [path.resolve(__dirname, '../src'), /node_modules\/antd/],
+                use: [
+                    'style-loader', 
+                    { loader: 'css-loader', options: { 
+                        importLoaders: 2,
+                        // module: true,
+                        // localIdentName: '[local]-[hash:base64:6]'
+                    } }, 
+                    // 'css-loader',
+                    'postcss-loader', 
+                    'less-loader',
+                    // 'less-loader'
                 ],
             },
             {

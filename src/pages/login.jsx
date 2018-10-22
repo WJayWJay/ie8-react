@@ -7,13 +7,38 @@ import { login } from '@/network';
 const FormItem = Form.Item;
 class Login extends React.PureComponent {
 
+    state = {
+        modal2Visible: false,
+        errMsg: '出错了',
+    };
+
+    setModal2Visible = (flag) => {
+        this.setState({
+            modal2Visible: !!flag
+        });
+    }
+
+    setError = (msg) => {
+        this.setState({
+            errMsg: msg
+        });
+    }
 
     handleSubmit = () => {
         const { getFieldsValue } = this.props.form;
         const fields = getFieldsValue();
-        login(fields).then(res => {
+        console.log(fields)
+        
+        login({
+            email: fields.username,
+            password: fields.password
+        }).then(res => {
+            console.log(res, 'rrrr')
             if (res && res.code === 0) {
                 this.props.navigate('/home')
+            } else {
+                this.setError(res.msg);
+                this.setModal2Visible(true);
             }
         });
     }
@@ -81,6 +106,16 @@ class Login extends React.PureComponent {
                     <span>Copyright 2018@xxx.com</span>
                 </div>
             </div>
+            <Modal
+                title="垂直居中的对话框"
+                wrapClassName="vertical-center-modal"
+                visible={this.state.modal2Visible}
+                onOk={() => this.setModal2Visible(false)}
+                footer={<Button onClick={() => this.setModal2Visible(false)}>确定</Button>}
+                // onCancel={() => this.setModal2Visible(false)}
+            >
+                <p>{this.state.errMsg}</p>
+            </Modal>
         </div>
     }
 }

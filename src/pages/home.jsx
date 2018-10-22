@@ -26,7 +26,7 @@ export default class Home extends React.PureComponent {
         const { children } = this.props;
         return <div className="data-home-container">
             <div className="header">
-                <span>资料系统</span><span> V1.0</span>
+                <span className='title'>资料系统</span><span> V1.0</span>
             </div>
             <div className="content">
                 <div className="navigation">
