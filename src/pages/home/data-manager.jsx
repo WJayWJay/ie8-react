@@ -1,6 +1,6 @@
 
 import React from 'react'
-import { Button, Modal,Table } from 'antd';
+import { Button, Modal,Table, Spin } from 'antd';
 
 import { chunk } from 'lodash';
 import { postCategory, getCategoryList } from '@/network';
@@ -18,6 +18,10 @@ export default class Index extends React.PureComponent {
         page: 1,
         total: 0,
         loading: false,
+        dataLoading: false,
+
+        cardInfo: {},
+        mode: 'add',
     };
 
     setCardVisibility = (flag) => {
@@ -28,7 +32,11 @@ export default class Index extends React.PureComponent {
     }
 
     showCard = () => {
+        this.setState({
+            cardInfo: {}
+        });
         this.setCardVisibility(true);
+        this.setMode('add');
     }
 
     setLoading = (flag) => {
@@ -55,10 +63,10 @@ export default class Index extends React.PureComponent {
     }
 
     getData = (page = 1) => {
-        this.setState({loading: true});
+        this.setState({dataLoading: true});
         getCategoryList({page: page}).then(res => {
             console.log(res);
-            this.setState({loading: false});
+            this.setState({dataLoading: false});
             if (res && res.code === 0) {
                 const data = res.data.data;
                 this.setState({data, total: res.data.total, page: res.data.current_page, pageSize: res.data.per_page});
@@ -76,6 +84,19 @@ export default class Index extends React.PureComponent {
 
     componentDidMount() {
         this.getData(1);
+    }
+
+    editCard = (item) => {
+        this.setState({
+            cardInfo: item
+        });
+        this.setCardVisibility(true);
+        this.setMode('edit');
+    }
+    setMode = (type) => {
+        this.setState({
+            mode: type,
+        });
     }
 
     renderCard = (item) => {
@@ -104,7 +125,7 @@ export default class Index extends React.PureComponent {
                     <span>{item.projectName}</span>
                 </div>
                 <div className={'row-one row-one-right'}>
-                    <span>{'编辑'}</span>
+                    <span style={{cursor: 'pointer'}} onClick={() => this.editCard(item)}>{'编辑'}</span>
                 </div>
             <div 
                 className={'row-card'}
@@ -122,7 +143,7 @@ export default class Index extends React.PureComponent {
     }
 
     renderData = () => {
-        const { data } = this.state;
+        const { data, dataLoading } = this.state;
         let dataSplit = chunk(data, 4);
         if (dataSplit.length) {
             return (
@@ -135,7 +156,9 @@ export default class Index extends React.PureComponent {
                 </div>
             );
         } else {
-            return <div><span>暂无数据!</span></div>
+            return <div style={{textAlign: 'center'}}>
+                {dataLoading ? <Spin size={'large'} />: <span>暂无数据!</span>}
+            </div>
         }
     }
 
@@ -170,7 +193,12 @@ export default class Index extends React.PureComponent {
                 footer={null}
             >
                 <div>
-                    <CardInfo loading={this.state.loading} submit={this.submit} close={() => this.setCardVisibility(false)} />
+                    <CardInfo 
+                        mode={this.state.mode}
+                        data={this.state.cardInfo}
+                        loading={this.state.loading} 
+                        submit={this.submit} 
+                        close={() => this.setCardVisibility(false)} />
                 </div>
             </Modal>
             <Modal
