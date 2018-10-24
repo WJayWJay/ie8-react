@@ -57,9 +57,11 @@ export default class Index extends React.PureComponent {
                 this.setSuccessVisibility(true);
                 this.setAlertInfo(this.state.mode === 'add' ? '新增数据项成功!' : '更新数据项成功!');
                 this.getData();
-            } else {
+            } else if (res && res.code) {
                 this.setSuccessVisibility(true);
                 this.setAlertInfo('新增数据项失败!');
+            } else {
+                
             }
         });
     }
@@ -198,7 +200,7 @@ export default class Index extends React.PureComponent {
                 {this.renderData()}
 
                 <div>
-                    <Pagination {...pagination} />
+                    {data.length ? <Pagination {...pagination} /> : null}
                 </div>
             </div>
 
