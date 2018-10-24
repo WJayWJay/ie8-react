@@ -9,10 +9,19 @@ export default class Index extends React.PureComponent {
         data: [],
         loading: false,
         total: 0,
+        addBasicVisibility: false,
     };
 
-    addInfo = () => {
+    setBaisicVisibility = ( flag ) => {
+        this.setState({addBasicVisibility: flag});
+    } 
 
+    closeBaisicVisibility = () => {
+        this.setBaisicVisibility(false);
+    }
+
+    addInfo = () => {
+        this.setBaisicVisibility(true)
     }
 
     columns = [
@@ -86,9 +95,9 @@ export default class Index extends React.PureComponent {
             <Modal
                 title="新增用户信息"
                 wrapClassName="vertical-center-modal"
-                visible={this.state.successVisibility}
+                visible={this.state.addBasicVisibility}
                 onOk={() => this.onSuccessOk()}
-                onCancel={() => this.setSuccessVisibility(false)}
+                onCancel={() => this.setBaisicVisibility(false)}
                 // footer={null}
             >
                 <div>

@@ -1,10 +1,11 @@
 
 import React from 'react'
-import { Button, Modal,Table, Spin } from 'antd';
+import { Button, Modal,Table, Spin, Pagination } from 'antd';
 
 import { chunk } from 'lodash';
 import { postCategory, getCategoryList } from '@/network';
 import CardInfo from '@/component/card';
+import CardInfoEdit from '@/component/editCard';
 import '@/styles/data-manager.less';
 export default class Index extends React.PureComponent {
 
@@ -54,7 +55,8 @@ export default class Index extends React.PureComponent {
             if (res && res.code === 0) {
                 this.setCardVisibility(false);
                 this.setSuccessVisibility(true);
-                this.setAlertInfo('新增数据项成功!');
+                this.setAlertInfo(this.state.mode === 'add' ? '新增数据项成功!' : '更新数据项成功!');
+                this.getData();
             } else {
                 this.setSuccessVisibility(true);
                 this.setAlertInfo('新增数据项失败!');
@@ -127,6 +129,7 @@ export default class Index extends React.PureComponent {
                 <div className={'row-one row-one-right'}>
                     <span style={{cursor: 'pointer'}} onClick={() => this.editCard(item)}>{'编辑'}</span>
                 </div>
+            </div>
             <div 
                 className={'row-card'}
             >
@@ -137,7 +140,6 @@ export default class Index extends React.PureComponent {
                     {infoRect}
                 </div>
             </div>
-        </div>
         </div>
         );
     }
@@ -163,7 +165,19 @@ export default class Index extends React.PureComponent {
     }
 
     render () {
-
+        const pagination = {
+            total: this.state.total,
+            pageSize: 16,
+            current: this.state.page,
+            showSizeChanger: false,
+            onShowSizeChange(current, pageSize) {
+                console.log('Current: ', current, '; PageSize: ', pageSize);
+            },
+            onChange: (current) => {
+                // console.log('Current: ', current);
+                this.getData(current);
+            },
+        };
         return <div className="data-manager-container">
             <div className={'data-header-container'}>
                 <div className={'manager-header'}>
@@ -182,10 +196,15 @@ export default class Index extends React.PureComponent {
             </div>
             <div className={'data-manager-content'}>
                 {this.renderData()}
+
+                <div>
+                    <Pagination {...pagination} />
+                </div>
             </div>
 
             <Modal
                 title="新增数据项"
+                maskClosable={false}
                 wrapClassName="vertical-center-modal"
                 visible={this.state.cardVisibility}
                 onOk={() => this.setCardVisibility(false)}
@@ -193,12 +212,21 @@ export default class Index extends React.PureComponent {
                 footer={null}
             >
                 <div>
-                    <CardInfo 
-                        mode={this.state.mode}
-                        data={this.state.cardInfo}
-                        loading={this.state.loading} 
-                        submit={this.submit} 
-                        close={() => this.setCardVisibility(false)} />
+                    {
+                        this.state.mode === 'add' ? <CardInfo 
+                            mode={this.state.mode}
+                            data={this.state.cardInfo}
+                            loading={this.state.loading} 
+                            submit={this.submit} 
+                            close={() => this.setCardVisibility(false)} />
+                        :
+                        <CardInfoEdit 
+                            mode={this.state.mode}
+                            data={this.state.cardInfo}
+                            loading={this.state.loading} 
+                            submit={this.submit} 
+                            close={() => this.setCardVisibility(false)} />
+                    }
                 </div>
             </Modal>
             <Modal

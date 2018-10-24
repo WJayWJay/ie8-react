@@ -29,3 +29,9 @@ export function getCategoryList(params) {
         return res;
     });
 }
+
+export function getUserInfo(params) {
+    return request.get(PREFIX + '/user/info', {params}).then(res => {
+        return res;
+    });
+}
