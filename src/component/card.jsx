@@ -112,7 +112,7 @@ class Index extends PureComponent {
     
     renderRadio = () => {
         const { getFieldProps, getFieldValue } = this.props.form;
-        return null;
+        
         const formItemLayout = {
             labelCol: { span: 6 },
             wrapperCol: { span: 18 },

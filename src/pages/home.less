@@ -16,14 +16,34 @@
             display: inline-block;
             text-align: right;
             position: relative;
+            padding: 10px;
+            &:hover {
+                >.head-right-hover {
+                    display: block;
+                }
+            }
             >.head-right-hover {
                 position: absolute;
-                border: 1px solid red;
+                border-radius: 4px;
                 right: 10px;
-                top: 22px;
+                top: 36px;
+                background-color: #6d6868;
+                display: none;
                 .head-right-btn {
                     padding: 5px 20px;
-                    color: #a0a0a0;
+                    color: #fff;
+                    cursor: pointer;
+                    &:first-child {
+                        border-bottom: 1px solid #fff;
+                    }
+                }
+                &:before {
+                    content: '';
+                    border: 10px solid transparent;
+                    border-bottom: 10px solid #6d6868;
+                    position: absolute;
+                    top: -19px;
+                    right: 10px;
                 }
             }
         }

@@ -3,7 +3,7 @@ import React from 'react'
 import { Button, Modal,Table, Spin, Pagination } from 'antd';
 
 import { chunk } from 'lodash';
-import { postCategory, getCategoryList } from '@/network';
+import { postCategory, getCategoryList, deleteCatogry } from '@/network';
 import CardInfo from '@/component/card';
 import CardInfoEdit from '@/component/editCard';
 import '@/styles/data-manager.less';
@@ -12,6 +12,7 @@ export default class Index extends React.PureComponent {
     state = {
         cardVisibility: false,
         successVisibility: false,
+        deleteAlertVisibility: false,
         loading: false,
         alertInfo: '新增数据项成功!',
 
@@ -90,9 +91,21 @@ export default class Index extends React.PureComponent {
         this.getData(1);
     }
 
+    computeIsUsedFor = (item) => {
+        let isUsedFor = [];
+        item.submit === 1 && isUsedFor.push(1);
+        item.basic === 1 && isUsedFor.push(2);
+        item.filter === 1 && isUsedFor.push(3);
+        return isUsedFor.join('.');
+    }
+
     editCard = (item) => {
+
         this.setState({
-            cardInfo: item
+            cardInfo: {
+                ...item,
+                isUsedFor: this.computeIsUsedFor(item)
+            }
         });
         this.setCardVisibility(true);
         this.setMode('edit');
@@ -104,7 +117,7 @@ export default class Index extends React.PureComponent {
     }
 
     renderCard = (item) => {
-        let used = item.isUsedFor;
+        let used = this.computeIsUsedFor(item);
         let infoRect = null;
         const selected = [
             '',
@@ -166,7 +179,31 @@ export default class Index extends React.PureComponent {
         }
     }
 
+    setDeleteAlertVisibility = (flag) => {
+        this.setState({deleteAlertVisibility: flag});
+    }
+    deleteCat = () => {
+        this.setDeleteAlertVisibility(true);
+    }
+
+    openModal = (content) => {
+        this.setState({alertInfo: content || ''});
+        this.setSuccessVisibility(true);
+    }
+
+    toDelete = () => {
+        const {cardInfo} = this.state;
+        deleteCatogry({id: cardInfo.id}).then(res => {
+            if (res && res.code === 0) {
+                this.openModal('删除成功');
+            } else {
+                this.openModal('删除失败')
+            }
+        })
+    }
+
     render () {
+        const { data } = this.state;
         const pagination = {
             total: this.state.total,
             pageSize: 16,
@@ -186,10 +223,10 @@ export default class Index extends React.PureComponent {
                     <div className={'rect green'}></div><span>提交资料中显示</span>
                 </div>
                 <div className={'manager-header'}>
-                    <div className={'rect blue'}></div><span>提交资料中显示</span>
+                    <div className={'rect blue'}></div><span>基本信息列表中显示</span>
                 </div>
                 <div className={'manager-header'}>
-                    <div className={'rect yellow'}></div><span>提交资料中显示</span>
+                    <div className={'rect yellow'}></div><span>作为基本信息筛选项</span>
                 </div>
                 <div className={'data-header-right'}>
                     <div><Button onClick={this.showCard}>+新数据项</Button></div>
@@ -222,17 +259,18 @@ export default class Index extends React.PureComponent {
                             submit={this.submit} 
                             close={() => this.setCardVisibility(false)} />
                         :
-                        <CardInfoEdit 
+                        <CardInfoEdit
                             mode={this.state.mode}
                             data={this.state.cardInfo}
                             loading={this.state.loading} 
                             submit={this.submit} 
+                            deleteCat={this.deleteCat}
                             close={() => this.setCardVisibility(false)} />
                     }
                 </div>
             </Modal>
             <Modal
-                title="新增数据项提示"
+                title="数据项提示"
                 wrapClassName="vertical-center-modal"
                 visible={this.state.successVisibility}
                 onOk={() => this.onSuccessOk()}
@@ -241,6 +279,18 @@ export default class Index extends React.PureComponent {
             >
                 <div>
                     <span>{this.state.alertInfo}</span>
+                </div>
+            </Modal>
+            <Modal
+                title="删除数据项提示"
+                wrapClassName="vertical-center-modal"
+                visible={this.state.deleteAlertVisibility}
+                onOk={() => this.toDelete()}
+                onCancel={() => this.setDeleteAlertVisibility(false)}
+                // footer={null}
+            >
+                <div>
+                    <span>删除后无法恢复, 确定删除?</span>
                 </div>
             </Modal>
         </div>

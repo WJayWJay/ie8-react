@@ -145,21 +145,6 @@ class Index extends PureComponent {
                         usedChecked
                     });
                 }
-                
-            // if (newProps.data.options) {
-            //     let radioOptions = newProps.data.options;
-            //     try {
-            //         radioOptions = JSON.parse(radioOptions);
-            //     } catch (e) {}
-            //     if (Array.isArray(radioOptions)) {
-            //         this.setState({radioOptions});
-            //     }
-            // }
-            
-            // form.setFieldsValue({
-            //     type: newProps.data.type || 1
-            // });
-            
         }
     }
     componentDidMount () {
@@ -272,14 +257,19 @@ class Index extends PureComponent {
         })
 
         return;
-
-        
     }
 
     closeModal = () => {
         const { close } = this.props;
         if (close && typeof close === 'function') {
             close();
+        }
+    }
+
+    deleteCat = () => {
+        const {deleteCat} = this.props;
+        if (deleteCat && typeof deleteCat === 'function') {
+            deleteCat();
         }
     }
 
@@ -331,6 +321,9 @@ class Index extends PureComponent {
                         <CheckboxGroup value={this.state.usedChecked} options={plainOptions}  onChange={this.dataOnchange} />
                 </FormItem>
                 <FormItem style={{ marginTop: 24 }}>
+                    <div style={{paddingLeft: '10px'}}>
+                        <span onClick={this.deleteCat} style={{color: 'red', cursor: 'pointer'}}>彻底删除</span>
+                    </div>
                     <div style={{
                         display: 'inline-block',
                         width: '50%',

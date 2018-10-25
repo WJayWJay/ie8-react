@@ -1,6 +1,7 @@
 
 import React from 'react'
 import { Button, Table, Modal } from 'antd';
+import { getCategoryQuery } from '@/network';
 
 import '@/styles/basic-info.less';
 export default class Index extends React.PureComponent {
@@ -10,7 +11,27 @@ export default class Index extends React.PureComponent {
         loading: false,
         total: 0,
         addBasicVisibility: false,
+
+        submitForm: [],
     };
+
+    setSubmitForm = (data) => {
+        this.setState({
+            submitForm: Array.isArray(data) ? data : []
+        });
+    }
+    querySubmit = () => {
+        getCategoryQuery({submit: 1}).then(res => {
+            console.log(res, 'sumbit');
+            if (res && res.code === 0) {
+                this.setSubmitForm(res.data);
+            }
+        });
+    }
+
+    componentDidMount () {
+        this.querySubmit();
+    }
 
     setBaisicVisibility = ( flag ) => {
         this.setState({addBasicVisibility: flag});

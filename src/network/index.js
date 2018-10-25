@@ -30,6 +30,18 @@ export function getCategoryList(params) {
     });
 }
 
+export function getCategoryQuery(params) {
+    return request.get(PREFIX + '/category/query', {params}).then(res => {
+        return res;
+    });
+}
+
+export function deleteCatogry(params) {
+    return request.post(PREFIX + '/category/delete', params).then(res => {
+        return res;
+    });
+}
+
 export function getUserInfo(params) {
     return request.get(PREFIX + '/user/info', {params}).then(res => {
         return res;
