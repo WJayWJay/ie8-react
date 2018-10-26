@@ -9,7 +9,7 @@ export default class Home extends React.PureComponent {
     state = {
         current: 'statistic',
         user: {},
-        isLogin: true,
+        isLogin: false,
     };
     componentDidMount () {
         this.setState({
@@ -40,6 +40,7 @@ export default class Home extends React.PureComponent {
 
     render () {
         const { children } = this.props;
+        const { isLogin } = this.state;
         return <div className="data-home-container">
             <div className="header">
                 <div className={'header-left'}>
@@ -54,20 +55,22 @@ export default class Home extends React.PureComponent {
                 </div>
             </div>
             <div className="content">
-                <div className="navigation">
-                    <Menu 
-                        onClick={this.selectMenu}
-                        selectedKeys={this.state.current}
-                        mode="horizontal">
-                        <Menu.Item key="statistic">数据统计</Menu.Item>
-                        <Menu.Item key="baisc">基本信息</Menu.Item>
-                        <Menu.Item key="account">账号管理</Menu.Item>
-                        <Menu.Item key="data">数据项管理</Menu.Item>
-                    </Menu>
-                </div>
-                <div>
-                    {children}
-                </div>
+                {isLogin && <div>
+                    <div className="navigation">
+                        <Menu 
+                            onClick={this.selectMenu}
+                            selectedKeys={this.state.current}
+                            mode="horizontal">
+                            <Menu.Item key="statistic">数据统计</Menu.Item>
+                            <Menu.Item key="baisc">基本信息</Menu.Item>
+                            <Menu.Item key="account">账号管理</Menu.Item>
+                            <Menu.Item key="data">数据项管理</Menu.Item>
+                        </Menu>
+                    </div>
+                    <div>
+                        {children}
+                    </div>
+                </div>}
             </div>
         </div>
     }

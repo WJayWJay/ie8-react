@@ -1,7 +1,9 @@
 
 import React from 'react'
-import { Button, Table, Modal } from 'antd';
+import { Button, Table, Modal, Spin } from 'antd';
 import { getCategoryQuery } from '@/network';
+
+import UserCard from '@/component/userCard';
 
 import '@/styles/basic-info.less';
 export default class Index extends React.PureComponent {
@@ -12,7 +14,9 @@ export default class Index extends React.PureComponent {
         total: 0,
         addBasicVisibility: false,
 
+        loadingContent: null,
         submitForm: [],
+        dataLoading: false,
     };
 
     setSubmitForm = (data) => {
@@ -20,13 +24,39 @@ export default class Index extends React.PureComponent {
             submitForm: Array.isArray(data) ? data : []
         });
     }
+    setDataLoading = (flag) => {
+        this.setState({dataLoading: flag});
+    }
     querySubmit = () => {
+        this.setDataLoading(true);
         getCategoryQuery({submit: 1}).then(res => {
             console.log(res, 'sumbit');
             if (res && res.code === 0) {
                 this.setSubmitForm(res.data);
             }
+            return res;
+        }).then(res => {
+            this.setDataLoading(true);
+            return res;
         });
+    }
+
+    renderModal = (loading) => {
+        return (
+            <Modal
+                title={null}
+                wrapClassName="vertical-center-modal"
+                visible={loading}
+                footer={null}
+                closable={false}
+                width={200}
+                >
+                    <div style={{textAlign: 'center'}}>
+                        <div>加载中....</div>
+                        <div><Spin size={'large'} /></div>
+                    </div>
+            </Modal>
+        );
     }
 
     componentDidMount () {
@@ -76,6 +106,9 @@ export default class Index extends React.PureComponent {
             render: text => text
         },
     ];
+    submit = (data) => {
+
+    }
 
     render () {
         const state = this.state;
@@ -117,14 +150,16 @@ export default class Index extends React.PureComponent {
                 title="新增用户信息"
                 wrapClassName="vertical-center-modal"
                 visible={this.state.addBasicVisibility}
-                onOk={() => this.onSuccessOk()}
-                onCancel={() => this.setBaisicVisibility(false)}
-                // footer={null}
+                submit={this.submit}
+                close={() => this.setBaisicVisibility(false)}
+                footer={null}
             >
                 <div>
-                    <span>{this.state.alertInfo}</span>
+                    <UserCard data={this.state.submitForm} />
                 </div>
             </Modal>
+
+            {/* {this.renderModal(this.state.dataLoading)} */}
         </div>
     }
 }

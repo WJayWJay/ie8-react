@@ -40,9 +40,9 @@ class Login extends React.PureComponent {
             }).then(res => {
                 this.setState({loading: false});
 
-                console.log(res, 'rrrr')
+                // console.log(res, 'rrrr')
                 if (res && res.code === 0) {
-                    this.props.navigate('/home')
+                    this.props.navigate('/statistic')
                 } else {
                     this.setError(res && res.msg || '出错啦!');
                     this.setModal2Visible(true);
