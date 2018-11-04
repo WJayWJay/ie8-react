@@ -5,7 +5,7 @@ export default class Index extends React.PureComponent {
 
     render () {
         return <div className="data-home-container">
-            data-statistic
+            暂无信息
         </div>
     }
 }

@@ -13,6 +13,10 @@ module.exports = {
             target: "http://520.com:9001",
             secure: false,
           },
+          "/logout": {
+            target: "http://520.com:9001",
+            secure: false,
+          },
         // {
         //     target: "https://jf.gf.com.cn/"
         // },

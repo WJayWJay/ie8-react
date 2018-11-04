@@ -40,15 +40,20 @@ class Login extends React.PureComponent {
             }).then(res => {
                 this.setState({loading: false});
 
-                // console.log(res, 'rrrr')
                 if (res && res.code === 0) {
                     this.props.navigate('/statistic')
                 } else {
-                    this.setError(res && res.msg || '出错啦!');
+                    this.setError(res && res.msg || '出错啦, 请联系管理人员!');
                     this.setModal2Visible(true);
                 }
             });
         });
+    }
+
+    handleEnterEvt = (e) => {
+        if (e.keyCode === 13) {
+            this.handleSubmit();
+        }
     }
 
     checkPass = (rule, value, callback) => {
@@ -89,8 +94,7 @@ class Login extends React.PureComponent {
             //   console.log('你的密码就是这样被盗的：', e.target.value);
             },
         });
-
-        return <div className={'login-container'}>
+        return <div onKeyPress={this.handleEnterEvt} className={'login-container'}>
             <div className="login-box">
                 <h3>资料维护系统<span className="version"> v1.0</span></h3>
                 <div className="login-form">
@@ -138,6 +142,7 @@ class Login extends React.PureComponent {
                 wrapClassName="vertical-center-modal"
                 visible={this.state.modal2Visible}
                 onOk={() => this.setModal2Visible(false)}
+                onCancel={() => this.setModal2Visible(false)}
                 footer={<Button onClick={() => this.setModal2Visible(false)}>确定</Button>}
                 // onCancel={() => this.setModal2Visible(false)}
             >

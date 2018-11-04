@@ -1,6 +1,6 @@
 
 import React from 'react'
-import { Button, Modal,Table, Spin, Pagination } from 'antd';
+import { Button, Modal,Table, Spin, Pagination, Message, Icon } from 'antd';
 
 import { chunk } from 'lodash';
 import { postCategory, getCategoryList, deleteCatogry } from '@/network';
@@ -24,9 +24,14 @@ export default class Index extends React.PureComponent {
 
         cardInfo: {},
         mode: 'add',
+        
+        needResetData: false,
     };
 
     setCardVisibility = (flag) => {
+        if (flag && this.state.needResetData) {
+            this.setState({needResetData: false});
+        }
         this.setState({cardVisibility: flag});
     }
     setSuccessVisibility = (flag) => {
@@ -55,14 +60,18 @@ export default class Index extends React.PureComponent {
             this.setLoading(false);
             if (res && res.code === 0) {
                 this.setCardVisibility(false);
-                this.setSuccessVisibility(true);
-                this.setAlertInfo(this.state.mode === 'add' ? '新增数据项成功!' : '更新数据项成功!');
-                this.getData();
-            } else if (res && res.code) {
-                this.setSuccessVisibility(true);
-                this.setAlertInfo('新增数据项失败!');
-            } else {
+                // this.setSuccessVisibility(true);
+                // this.setAlertInfo(this.state.mode === 'add' ? '新增数据项成功!' : '更新数据项成功!');
+                Message.success('新增数据成功', 4);
+                this.setState({needResetData: true});
                 
+                this.getData(this.state.page);
+            } else if (res && res.code) {
+                // this.setSuccessVisibility(true);
+                // this.setAlertInfo('新增数据项失败!');
+                Message.error(res.msg || '新增数据失败', 5);
+            } else {
+                Message.error('新增数据失败', 4);         
             }
         });
     }
@@ -77,8 +86,17 @@ export default class Index extends React.PureComponent {
                 this.setState({data, total: res.data.total, page: res.data.current_page, pageSize: res.data.per_page});
             } else if(res && res.code === -1) {
                 this.props.navigate('/login');
+            } else {
+                Message.error('数据加载失败，请刷新!', 4);
             }
         });
+    }
+    toBefore = (item) => {
+
+    }
+
+    toback = (item) => {
+
     }
 
     onSuccessOk = () => {
@@ -96,6 +114,7 @@ export default class Index extends React.PureComponent {
         item.submit === 1 && isUsedFor.push(1);
         item.basic === 1 && isUsedFor.push(2);
         item.filter === 1 && isUsedFor.push(3);
+        item.cardList === 1 && isUsedFor.push(4);
         return isUsedFor.join('.');
     }
 
@@ -124,6 +143,7 @@ export default class Index extends React.PureComponent {
             <div className={'rect green'}></div>,
             <div className={'rect blue'}></div>,
             <div className={'rect yellow'}></div>,
+            <div className={'rect red'}></div>,
         ];
         if (used) {
             used = used.split('.');
@@ -154,6 +174,9 @@ export default class Index extends React.PureComponent {
                 <div className={'row-one row-one-right'}>
                     {infoRect}
                 </div>
+                {/* <div style={{textAlign: 'right'}}>
+                    <Icon onClick={() =>this.toBefore(item)} type="left" style={{marginRight: '10px'}} /><Icon onClick={() =>this.toback(item)} type="right" />
+                </div> */}
             </div>
         </div>
         );
@@ -228,6 +251,9 @@ export default class Index extends React.PureComponent {
                 <div className={'manager-header'}>
                     <div className={'rect yellow'}></div><span>作为基本信息筛选项</span>
                 </div>
+                <div className={'manager-header'}>
+                    <div className={'rect red'}></div><span>作为基本信息列表-卡片</span>
+                </div>
                 <div className={'data-header-right'}>
                     <div><Button onClick={this.showCard}>+新数据项</Button></div>
                 </div>
@@ -253,6 +279,7 @@ export default class Index extends React.PureComponent {
                 <div>
                     {
                         this.state.mode === 'add' ? <CardInfo 
+                            needs={this.state.needResetData}
                             mode={this.state.mode}
                             data={this.state.cardInfo}
                             loading={this.state.loading} 

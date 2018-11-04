@@ -104,7 +104,7 @@ const config = {
             },
         ],
     },
-    mode: isProd ? 'production':'development',
+    mode: 'development', //isProd ? 'production' : 'development',
     plugins: [
         new es3ifyPlugin(),
         new HtmlWebpackPlugin({

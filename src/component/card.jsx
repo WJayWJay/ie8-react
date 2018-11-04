@@ -37,6 +37,14 @@ class Index extends PureComponent {
         });
     };
 
+    componentWillReceiveProps(newProps) {
+        const needs = newProps.needs;
+        console.log(needs, typeof needs, 'nnnnnneeeds');
+        if (needs === true) {
+            this.props.form.resetFields();
+        }
+    }
+
     renderProjName () {
         const { getFieldProps, getFieldError } = this.props.form;
         const { data, mode } = this.props;
@@ -219,6 +227,7 @@ class Index extends PureComponent {
             {value: 1, label: '提交资料中显示'},
             {value: 2, label: '基本信息列表中显示'},
             {value: 3, label: '作为基本信息筛选项'},
+            {value: 4, label: '作为基本信息列表-卡片'},
         ];
         const isUpdate = mode === 'edit';
         const type = getFieldValue('type');

@@ -125,7 +125,6 @@ class Index extends PureComponent {
             (newProps.data && newProps.data && newProps.data.id !== oldProps.data.id )
             ) {
                 if (newProps.data.id !== this.state.cardInfo.id) {
-                    console.log('sssetttt')
                     let radioOptions = [];
                     if (newProps.data.options) {
                         radioOptions = newProps.data.options;
@@ -144,6 +143,7 @@ class Index extends PureComponent {
                         radioOptions,
                         usedChecked
                     });
+                    form.resetFields();
                 }
         }
     }
@@ -181,11 +181,12 @@ class Index extends PureComponent {
         };
 
         if (!options.length) options = [''];
-        console.log('-----------------')
-        console.log(options)
+        // console.log('-----------------')
+        // console.log(options)
         getFieldProps('keys', {
             initialValue: options,
         });
+
         let formItems = getFieldValue('keys').map((k, index) => {
             return (
                 <Form.Item {...formItemLayout} label={`选项：`} key={index}>
@@ -202,6 +203,7 @@ class Index extends PureComponent {
                 </Form.Item>
             );
         });
+        
         return formItems;
     }
     renderSelected () {
@@ -285,8 +287,11 @@ class Index extends PureComponent {
             {value: 1, label: '提交资料中显示'},
             {value: 2, label: '基本信息列表中显示'},
             {value: 3, label: '作为基本信息筛选项'},
+            {value: 4, label: '作为基本信息列表-卡片'},
         ];
         const isUpdate = mode === 'edit';
+        const type = getFieldValue('type');
+        console.log(data, 'ddddd')
         return <div>
             <Form horizontal 
                 onSubmit={this.handleSubmit}
@@ -308,7 +313,7 @@ class Index extends PureComponent {
                         {options.map(item => <Option value={item.val}>{item.key}</Option>)}
                     </Select>
                 </FormItem>
-                {data && data.type === 2 && <Form.Item wrapperCol={{ span: 18, offset: 6 }}>
+                {type === 2 && <Form.Item wrapperCol={{ span: 18, offset: 6 }}>
                     <Button onClick={this.add} style={{ marginRight: 8 }}>新增选项</Button>
                 </Form.Item>}
  

@@ -1,28 +1,42 @@
 import React from 'react'
 import { Link } from 'router'
-import { Form, Input, Select, Cascader, Radio, Icon, Upload, Button, DatePicker } from 'antd';
-import { getUserInfo } from '@/network'
+import { 
+    Form, 
+    Input, 
+    Select, 
+    Cascader, 
+    Radio, 
+    Icon, 
+    Upload, 
+    Button, 
+    DatePicker, 
+    Spin, 
+    Modal 
+} from 'antd';
+
+import constant from '@/constant/index'
+import areaData from '@/constant/data'
 
 const FormItem = Form.Item;
 const Option = Select.Option;
 const RadioGroup = Radio.Group;
 
-
-
 import '@/styles/user-card.less';
 class UserCard extends React.PureComponent {
 
     state = {
-
+        fileList: [],
+        areaData: []
     };
 
     renderRadio = (item) => {
         const { getFieldProps } = this.props.form;
         const fieldProp = getFieldProps(item.proAliasName, {
             initialValue: '',
-            rules: [
-
-            ]
+            rules: [{
+                required: true,
+                message: `请选择${item.projectName || item.projectName || ''}`
+            }]
         });
         let options = item.options;
         if (!options) return null;
@@ -42,48 +56,142 @@ class UserCard extends React.PureComponent {
     renderDatePicker = (item) => {
         const { getFieldProps } = this.props.form;
         return (
-            <DatePicker {...getFieldProps(item.proAliasName)} />
+            <DatePicker {...getFieldProps(item.proAliasName, {
+                rules: [{
+                    required: true,
+                //     whitespace: false,
+                    message: `请输入${item.projectName || ''}`,
+                }]
+            })} />
         );
     }
-    normFile(e) {
-        if (Array.isArray(e)) {
-          return e;
+    handleImageChange = (info, name) => {
+        const { form } = this.props;
+        console.log(info)
+        let fileList = info.fileList;
+        // 1. 上传列表数量的限制
+        //    只显示最近上传的一个，旧的会被新的顶掉
+        fileList = fileList.slice(-1);
+        console.log(fileList)
+
+        // 2. 读取远程路径并显示链接
+        fileList = fileList.map((file) => {
+            if (file.response && file.response.code === 0) {
+            // 组件会将 file.url 作为链接进行展示
+                file.url = constant.cdn + file.response.data.url;
+                file.uuid = file.response.data.uuid;
+            }
+            return file;
+        });
+  
+        // 3. 按照服务器返回信息筛选成功上传的文件
+        fileList = fileList.filter((file) => {
+            if (file.response) {
+                return file.response.code === 0;
+            }
+            return true;
+        });
+
+        console.log(fileList, 'ffi*********lei')
+        if (fileList.length && fileList[0].uuid) {
+            form.setFieldsValue({
+                [name]: fileList[0].uuid
+            })
+        } else {
+            form.setFieldsValue({
+                [name]: ''
+            })
         }
-        return e && e.fileList;
+        this.setState({ fileList });
     }
     renderImagePicker = (item) => {
         const { getFieldProps } = this.props.form;
-        return (
-            <Upload name="logo" action="/upload.do" listType="picture" onChange={this.handleUpload}
-                {...getFieldProps(item.proAliasName, {
-                    valuePropName: 'fileList',
-                    normalize: this.normFile,
-                })}
+        getFieldProps(item.proAliasName, {
+            initialValue: '',
+        });
+        const props = {
+            action: '/private/avatar/upload',
+            name: 'avatar',
+            listType: 'picture-card',
+            // defaultFileList: [{
+            //   uid: -1,
+            //   name: 'xxx.png',
+            //   status: 'done',
+            //   url: 'https://os.alipayobjects.com/rmsportal/NDbkJhpzmLxtPhB.png',
+            //   thumbUrl: 'https://os.alipayobjects.com/rmsportal/NDbkJhpzmLxtPhB.png',
+            // }],
+            accept: 'image/*',
+            multiple: false,
+            onPreview: (file) => {
+              this.setState({
+                priviewImage: file.url,
+                priviewVisible: true,
+              });
+            },
+            
+        };
+        // {...getFieldProps(item.proAliasName, {
+        //     valuePropName: 'fileList',
+        //     normalize: this.normFile,
+        // })}
+        return (<div>
+            <Upload {...props}
+                onChange={(info) => this.handleImageChange(info, item.proAliasName)}
+                fileList={this.state.fileList}
             >
-                <Button type="ghost">
-                    <Icon type="upload" /> 点击上传
-                </Button>
+                <Icon type="plus" />
+                <div className="ant-upload-text">上传照片</div>
             </Upload>
-        );
+            <Modal visible={this.state.priviewVisible} footer={null} onCancel={this.handlePreviewCancel}>
+                <img width={'100%'} alt="example" src={this.state.priviewImage} />
+            </Modal>
+        </div>);
+    }
+    handlePreviewCancel = () => {
+        this.setState({
+            priviewVisible: false,
+        });
+    }
+    
+    filledData = (data) => {
+        let areas = [];
+        for (let i in data) {
+            if (typeof areaData[i] === 'object') {
+                const children = this.filledData(areaData[i]);
+                areas.push({
+                    value: i,
+                    label: data[i],
+                    children
+                });
+            } else {
+                areas.push({
+                    value: i,
+                    label: data[i],
+                });
+            }
+        }
+        return areas;
+    }
+
+    compouteAreaData = () => {
+        if (this.state.areaData.length) return;
+        const china = areaData['86'];
+        const sortedData = this.filledData(china);
+        this.setState({
+            areaData: sortedData,
+        })
     }
     renderArea = (item) => {
+        this.compouteAreaData();
         const { getFieldProps } = this.props.form;
-        const areaData = [{
-            value: 'shanghai',
-            label: '上海',
-            children: [{
-              value: 'shanghaishi',
-              label: '上海市',
-              children: [{
-                value: 'pudongxinqu',
-                label: '浦东新区',
-              }],
-            }],
-          }];
-          
-          
+ 
         return (
-            <Cascader style={{ width: 200 }} options={areaData} {...getFieldProps(item.proAliasName)} />
+            <Cascader style={{ width: 200 }} options={this.state.areaData} {...getFieldProps(item.proAliasName, {
+                rules: [{
+                    required: true,
+                    message: `请选择${item.projectName || item.proAliasName || ''}`,
+                }]
+            })} />
         );
     }
 
@@ -98,7 +206,7 @@ class UserCard extends React.PureComponent {
                         rules: [{
                             required: true,
                             whitespace: true,
-                            message: '请输入该项',
+                            message: `请输入${item.projectName || item.proAliasName || ''}`,
                         }],
                     })}  />
                 );
@@ -117,7 +225,7 @@ class UserCard extends React.PureComponent {
                         rules: [{
                             required: true,
                             whitespace: true,
-                            message: '请输入该项',
+                            message: `请输入${item.projectName || item.proAliasName || ''}`,
                         }],
                     })}  />
                 );
@@ -130,14 +238,73 @@ class UserCard extends React.PureComponent {
     }
     handleSubmit = (e) => {
         e.preventDefault();
-        const { form } = this.props;
+        const { form, data, submit } = this.props;
         form.validateFields((errors, values) => {
             if (!!errors) {
                 return false;
             }
-            console.log(values);
+            console.log(values, data, 'dddd');
             // 
-
+            let submitData = [];
+            let imageError = [];
+            if (Array.isArray(data) && data.length) {
+                submitData = data.map(item =>{
+                    let value = values[item.proAliasName];
+                    switch(item.type) {
+                        case 1: 
+                            return {
+                                property: item.proAliasName,
+                                type: item.type,
+                                value: value,
+                                categoryId: item.id
+                            };
+                        case 2:
+                            return {
+                                property: item.proAliasName,
+                                type: item.type,
+                                value: value,
+                                categoryId: item.id
+                            };
+                        case 3: 
+                            let time = value && value.getTime() || 0;
+                            return {
+                                property: item.proAliasName,
+                                type: item.type,
+                                value: time + '',
+                                categoryId: item.id
+                            };
+                        case 4:
+                            return {
+                                property: item.proAliasName,
+                                type: item.type,
+                                value: value,
+                                categoryId: item.id
+                            };
+                        case 5: 
+                            if(!value)  {
+                                imageError.push({error: item.proAliasName, message: '请选择图片'})
+                            }
+                            return {
+                                property: item.proAliasName,
+                                type: item.type,
+                                value: value,
+                                categoryId: item.id
+                            };
+                        default: 
+                            return '';
+                    }
+                });
+            } else {
+                return;
+            }
+            if (imageError.length) {
+                console.log('请选择图片')
+                return;
+            }
+            console.log(submitData, 'submitData')
+            if (typeof submit === 'function') {
+                submit(submitData);
+            }
         });
 
     }
@@ -154,9 +321,12 @@ class UserCard extends React.PureComponent {
         );
     }
     renderForm = () => {
-        const { data , form, loading} = this.props;
+        const { data , form, loading, dataLoading} = this.props;
         console.log(data, 'dddd')
         if (!Array.isArray(data)) return null;
+        if (dataLoading) {
+            return <div style={{textAlign: 'center'}}><Spin type={'large'} /><span>信息加载中...</span></div>
+        }
         return (
             <Form horizontal>
                 {data.map(item => this.renderFormItem(item))}
