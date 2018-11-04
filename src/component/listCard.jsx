@@ -154,8 +154,8 @@ class Index extends PureComponent {
     }
 
     renderCol = (item, index) => {
-        const { columns } = this.props;
-
+        const { columns: myColumns } = this.props;
+        let columns = myColumns.filter(i => i && i.cardList == 1);
         const images = columns.find(item => item && item.type === 5);
         let newColumnes = columns.filter(i => i && i.type !== 5);
         let four = newColumnes.slice(0, 4);

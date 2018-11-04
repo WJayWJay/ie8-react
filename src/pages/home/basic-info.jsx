@@ -17,10 +17,14 @@ import FilterSearchBar from '@/component/filterSearchBar';
 import constant from '@/constant/index';
 import { timeFormat , areaFormat} from '@/util/util';
 
+import { throttle, debounce } from 'lodash'
+
+
 import '@/styles/basic-info.less';
 
 const Option = Select.Option;
 const FormItem = Form.Item;
+
 
 const exportUrl = '';
 export default class Index extends React.PureComponent {
@@ -64,7 +68,10 @@ export default class Index extends React.PureComponent {
         openImportExcel: false,
         importExcelLoading: false,
 
-        filterData: []
+        filterData: [],
+
+        useSearch: false,
+        searchData: {},
     };
 
     setSubmitForm = (data) => {
@@ -192,11 +199,21 @@ export default class Index extends React.PureComponent {
         // .then(res => {
         //     this.setState({exportExcelLoading: false});
         // });
-
+        const {searchData} = this.state;
+        console.log(searchData);
+        let i;
+        let data ='';
+        let url = '';
+        for (i in searchData) {
+            let values = searchData[i];
+            url = `property=${i}&type=${values['type']}&value=${values['value']}`
+            if (values['value'] == 0) url = ''; 
+        }
+        console.log(url, 'url')
         if(this.state.listType === 2) {
-            window.open(constant.exportExcelUrl, '_blank');
+            window.open(constant.exportExcelUrl+`?${url}`, '_blank');
         } else {
-            window.open(constant.exportWordUrl, '_blank');
+            window.open(constant.exportWordUrl+ `?${url}`, '_blank');
         }
 
     }
@@ -228,10 +245,13 @@ export default class Index extends React.PureComponent {
         });
     }
 
+    // myThrottle;
+
     componentDidMount () {
         this.querySubmit();
         this.getBasicInfoList();
         this.getFilterData();
+        // this.myThrottle = (fn) => debounce(fn, 1000);
     }
 
     setBaisicVisibility = ( flag ) => {
@@ -318,7 +338,10 @@ export default class Index extends React.PureComponent {
     }
 
     refreshList = () => {
-        const { page } = this.state;
+        const { page , useSearch} = this.state;
+        if (useSearch) {
+            return this.getBasicFilterPage(page);
+        }
         this.getBasicInfoList(page);
     }
 
@@ -342,6 +365,9 @@ export default class Index extends React.PureComponent {
             },
             onChange: (current) => {
                 // console.log('Current: ', current);
+                if (this.state.useSearch) {
+                    return this.getBasicFilterPage(current);
+                }
                 this.getBasicInfoList(current);
             },
         }
@@ -388,7 +414,9 @@ export default class Index extends React.PureComponent {
                 console.log('Current: ', current, '; PageSize: ', pageSize);
             },
             onChange: (current) => {
-                // console.log('Current: ', current);
+                if (this.state.useSearch) {
+                    return this.getBasicFilterPage(current);
+                }
                 this.getBasicInfoList(current);
             },
         };
@@ -420,11 +448,23 @@ export default class Index extends React.PureComponent {
         this.setState({listType: type});
     }
 
-    getBasicData = (data) => {
+    getBasicData = (data, param = {page: 1}) => {
         console.log('ready tototo')
-        queryAccordingFilter(data).then(res => {
+        this.setState({useSearch: true, searchData: data});
+        queryAccordingFilter(data, param).then(res => {
             console.log(res, 'queryAccordingFilter')
+
+            if (res && res.code === 0) {
+                const data = res.data.data;
+                this.setBasicListData(data);
+                this.setState({dataSource: data, total: res.data.total, page: res.data.current_page, pageSize: res.data.per_page})
+            }
         })
+    }
+
+    getBasicFilterPage = (page) => {
+        const { searchData } = this.state;
+        this.getBasicData(searchData, {page});
     }
 
     renderFilter = () => {

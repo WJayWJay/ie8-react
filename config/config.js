@@ -7,7 +7,7 @@ module.exports = {
         "/private": {
             target: "http://520.com:9001",
             secure: false,
-            // pathRewrite: {"^/prvate" : ""}
+            // pathRewrite: {"^/api" : ""}
           },
           "/login": {
             target: "http://520.com:9001",

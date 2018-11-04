@@ -3,12 +3,11 @@ import { Form, Input, Button, Select, Upload, Icon, Message } from 'antd';
 
 import constant from '@/constant/index';
 
-import { throttle } from 'lodash'
+import { throttle, debounce } from 'lodash'
 
 const FormItem = Form.Item;
 const Option = Select.Option;
 
-const myThrottle = (fn) => throttle(fn, 500)();
 
 class Index extends PureComponent {
 
@@ -44,7 +43,7 @@ class Index extends PureComponent {
         console.log(e, item) 
         const type = item.type;
         const alias = item.proAliasName;
-        const value = typeof e === 'string' ? e : e.target.value;
+        const value = !e || typeof e === 'string' ? e : e.target.value;
 
         let current = {
             type: type,
@@ -52,6 +51,10 @@ class Index extends PureComponent {
         }
 
         let preSearch = {...searchData, ...{[alias]: current}};
+        let postData = {[alias]: current};
+        if (e == 0) {
+            delete preSearch[alias];
+        }
 
         this.setState({
             searchData: preSearch,
@@ -59,17 +62,17 @@ class Index extends PureComponent {
         });
         let values = form.getFieldsValue();
         console.log(preSearch, 'vvvvv', values);
-        myThrottle(() => {
-            this.handleSubmit(preSearch);
-        });
+
+        clearTimeout(this.myThrottle);
+        this.myThrottle = setTimeout(() => {
+            this.handleSubmit(postData);
+        }, 1000);
     }
 
+    myThrottle = 0;
 
-    shouldComponentUpdate() {
-        console.log('componentDidMount')
-        const data = this.props.data;
-        const formData = this.state.formData;
-        return data.length != formData.length;
+    componentDidMount() {
+        console.log('componentDidMount1111')
     }
 
     componentWillReceiveProps(newProps, oldProps) {
@@ -91,7 +94,8 @@ class Index extends PureComponent {
     }
 
     render () {
-        const { formData: data , formData1} = this.state;
+        const { formData1} = this.state;
+        const { data } = this.props;
         const { getFieldProps, getFieldError, isFieldValidating } = this.props.form;
         console.log(data, 'jjjjjjj')
         return (

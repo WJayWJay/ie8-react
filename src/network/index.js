@@ -1,9 +1,9 @@
 import request from './network';
 
 // import { setToken } from './token';
-import { api } from '@/constant/index';
+import constant from '@/constant/index';
 
-const PREFIX = api + '/private';
+const PREFIX = constant.api + '/private';
 
 export function login(data) {
     return request.post('/login', data).then(res => {
@@ -70,6 +70,11 @@ export function getCategoryQuery(params) {
         return res;
     });
 }
+export function moveStep(data) {
+    return request.post(PREFIX + '/category/moveStep', data).then(res => {
+        return res;
+    });
+}
 export function getCategoryFilter(params = {}) {
     return request.get(PREFIX + '/category/filter/list', {params}).then(res => {
         return res;
@@ -118,8 +123,10 @@ export function importExcel(data) {
     });
 }
 
-export function queryAccordingFilter(params) {
-    return request.post(PREFIX + '/basicinfo/filter/list', params).then(res => {
+export function queryAccordingFilter(data, params) {
+    return request.post(PREFIX + '/basicinfo/filter/list', data, {
+        params: params
+    }).then(res => {
         return res;
     });
 }

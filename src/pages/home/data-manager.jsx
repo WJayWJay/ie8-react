@@ -3,7 +3,7 @@ import React from 'react'
 import { Button, Modal,Table, Spin, Pagination, Message, Icon } from 'antd';
 
 import { chunk } from 'lodash';
-import { postCategory, getCategoryList, deleteCatogry } from '@/network';
+import { postCategory, getCategoryList, deleteCatogry, moveStep } from '@/network';
 import CardInfo from '@/component/card';
 import CardInfoEdit from '@/component/editCard';
 import '@/styles/data-manager.less';
@@ -92,11 +92,31 @@ export default class Index extends React.PureComponent {
         });
     }
     toBefore = (item) => {
-
+        moveStep({
+            id: item.id,
+            type: 1,
+        }).then(res => {
+            if (res && res.code === 0) {
+                Message.success('移动成功！');
+                this.getData(this.state.page);
+            } else if (res && res.code) {
+                Message.fail( res.msg || '移动失败！');
+            }
+        })
     }
 
     toback = (item) => {
-
+        moveStep({
+            id: item.id,
+            type: -1,
+        }).then(res => {
+            if (res && res.code === 0) {
+                Message.success('移动成功！');
+                this.getData(this.state.page);
+            } else if (res && res.code) {
+                Message.fail( res.msg || '移动失败！');
+            }
+        })
     }
 
     onSuccessOk = () => {
@@ -174,9 +194,10 @@ export default class Index extends React.PureComponent {
                 <div className={'row-one row-one-right'}>
                     {infoRect}
                 </div>
-                {/* <div style={{textAlign: 'right'}}>
-                    <Icon onClick={() =>this.toBefore(item)} type="left" style={{marginRight: '10px'}} /><Icon onClick={() =>this.toback(item)} type="right" />
-                </div> */}
+                <div style={{textAlign: 'right'}}>
+                    <Icon onClick={() =>this.toBefore(item)} type="left" style={{marginRight: '10px', cursor: 'pointer'}} />
+                    <Icon onClick={() =>this.toback(item)} type="right" style={{cursor: 'pointer'}}/>
+                </div>
             </div>
         </div>
         );
